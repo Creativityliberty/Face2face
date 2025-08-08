@@ -127,9 +127,9 @@ const App: React.FC = () => {
         initialView={authModalView}
       />
 
-      <main className={`flex-1 flex bg-gray-100 ${isSharedMode ? 'justify-center items-center' : ''}`}>
+      <main className={`flex-1 flex bg-gray-100 ${isSharedMode ? 'max-w-7xl mx-auto' : ''}`}>
         {/* Left Panel - Quiz/Builder Content */}
-        <div className={isSharedMode ? "w-full max-w-4xl bg-white rounded-lg shadow-lg" : "w-1/2 bg-white"}>
+        <div className={isSharedMode ? "w-1/2 bg-white" : "w-1/2 bg-white"}>
           {(isBuilderMode && !isSharedMode) ? (
             <Builder 
               config={quizConfig} 
@@ -177,29 +177,29 @@ const App: React.FC = () => {
           )}
         </div>
         
-        {/* Right Panel - Preview (masqué en mode partage client) */}
-        {!isSharedMode && (
-          <div className="w-1/2 bg-black relative">
-            {getCurrentStepIndex() !== null && getCurrentStep() ? (
-              <MediaViewer 
-                media={getCurrentStep()!.media || { type: 'image', url: '' }} 
-                isWelcomeScreen={getCurrentStep()!.type === 0} 
-                className="h-full"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors cursor-pointer">
-                  <div className="w-10 h-10 border-2 border-white rounded-full flex items-center justify-center">
-                    <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent ml-1"></div>
-                  </div>
+        {/* Right Panel - Preview (toujours affiché pour les médias) */}
+        <div className="w-1/2 bg-black relative">
+          {getCurrentStepIndex() !== null && getCurrentStep() ? (
+            <MediaViewer 
+              media={getCurrentStep()!.media || { type: 'image', url: '' }} 
+              isWelcomeScreen={getCurrentStep()!.type === 0} 
+              className="h-full"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors cursor-pointer">
+                <div className="w-10 h-10 border-2 border-white rounded-full flex items-center justify-center">
+                  <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent ml-1"></div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
+          {!isSharedMode && (
             <div className="absolute bottom-4 left-4 text-white text-sm opacity-75 bg-black/50 px-2 py-1 rounded">
               Preview Mode
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
       
       <Footer 
