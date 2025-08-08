@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -21,6 +21,9 @@ RUN npx prisma generate
 
 # Build the application
 RUN npm run build
+
+# Prune devDependencies for production
+RUN npm prune --omit=dev
 
 # Production image, copy all the files and run the app
 FROM base AS runner

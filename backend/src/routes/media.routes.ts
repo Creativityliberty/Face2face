@@ -1,12 +1,12 @@
 // backend/src/routes/media.routes.ts – routes for media upload & recent list
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../utils/database';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
-import path from 'path';
-import fs from 'fs/promises';
-import { createWriteStream } from 'fs';
-import { v4 as uuidv4 } from 'uuid';
+import { pipeline } from 'node:stream';
+import { promisify } from 'node:util';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import { createWriteStream } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 
 const pump = promisify(pipeline);
 
@@ -25,7 +25,7 @@ export async function mediaRoutes(fastify: FastifyInstance) {
 
     // generate unique filename
     const ext = path.extname(filename);
-    const newName = `${uuidv4()}${ext}`;
+    const newName = `${randomUUID()}${ext}`;
     const uploadDir = path.resolve(process.cwd(), 'uploads');
     await fs.mkdir(uploadDir, { recursive: true });
     const filePath = path.join(uploadDir, newName);
@@ -51,14 +51,5 @@ export async function mediaRoutes(fastify: FastifyInstance) {
     });
 
     return reply.send({ url });
-  });
-
-  // GET /api/media/recent – latest 20 media entries
-  fastify.get('/recent', async (request, reply) => {
-    const medias = await prisma.media.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 20,
-    });
-    return reply.send(medias);
   });
 }

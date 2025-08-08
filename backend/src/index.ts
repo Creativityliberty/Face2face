@@ -5,6 +5,9 @@ import { config } from 'dotenv';
 import { authRoutes } from './routes/auth.routes';
 import { funnelRoutes } from './routes/funnel.routes';
 import { leadRoutes } from './routes/lead.routes';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
+import { mediaRoutes } from './routes/media.routes';
 
 // Load environment variables
 config();
@@ -30,6 +33,12 @@ async function registerPlugins() {
       fileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760') // 10MB default
     }
   });
+
+  // Static files for uploaded media
+  await fastify.register(fastifyStatic, {
+    root: path.resolve(process.cwd(), 'uploads'),
+    prefix: '/uploads/',
+  });
 }
 
 // Register routes
@@ -43,18 +52,8 @@ async function registerRoutes() {
   await fastify.register(authRoutes, { prefix: '/api/auth' });
   await fastify.register(funnelRoutes, { prefix: '/api/funnels' });
   await fastify.register(leadRoutes, { prefix: '/api/leads' });
-  // Media routes (upload & recent)
-  await fastify.register(require('./routes/media.routes').mediaRoutes, { prefix: '/api/media' });
-
-  // Health check
-  fastify.get('/health', async (request, reply) => {
-    return { status: 'ok', timestamp: new Date().toISOString() };
-  });
-
-  // API routes
-  await fastify.register(authRoutes, { prefix: '/api/auth' });
-  await fastify.register(funnelRoutes, { prefix: '/api/funnels' });
-  await fastify.register(leadRoutes, { prefix: '/api/leads' });
+  // Media routes (upload)
+  await fastify.register(mediaRoutes, { prefix: '/api/media' });
 }
 
 // Error handler
@@ -86,13 +85,6 @@ fastify.setNotFoundHandler((request, reply) => {
     error: 'Not Found',
     message: `Route ${request.method} ${request.url} not found`
   });
-});
-
-// Register static folder for uploaded media
-import path from 'path';
-await fastify.register(require('@fastify/static'), {
-  root: path.resolve(process.cwd(), 'uploads'),
-  prefix: '/uploads/',
 });
 
 // Start server
