@@ -127,9 +127,11 @@ const App: React.FC = () => {
         initialView={authModalView}
       />
 
-      <main className={`flex-1 flex bg-gray-100 ${isSharedMode ? 'max-w-7xl mx-auto' : ''}`}>
-        {/* Left Panel - Quiz/Builder Content */}
-        <div className={isSharedMode ? "w-1/2 bg-white" : "w-1/2 bg-white"}>
+      <main className={`flex-1 flex ${isSharedMode ? 'bg-gray-50 px-4 py-8' : 'bg-gray-100'}`}>
+        {/* Container pour le mode partage */}
+        <div className={`flex w-full ${isSharedMode ? 'max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden' : ''}`}>
+          {/* Left Panel - Quiz/Builder Content */}
+          <div className={isSharedMode ? "w-1/2 bg-white" : "w-1/2 bg-white"}>
           {(isBuilderMode && !isSharedMode) ? (
             <Builder 
               config={quizConfig} 
@@ -171,6 +173,7 @@ const App: React.FC = () => {
               onRestartQuiz={() => {
                 // Redémarrer le quiz
                 console.log('Restarting quiz...');
+                navigateToStep(quizConfig.steps[0]?.id || '');
               }}
               totalAnswers={Object.keys(answers).length}
             />
@@ -199,6 +202,7 @@ const App: React.FC = () => {
               Preview Mode
             </div>
           )}
+          </div>
         </div>
       </main>
       
