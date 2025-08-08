@@ -1,0 +1,9 @@
+{
+  "name": "Video Funnel Builder",
+  "description": "An interactive builder to create and customize video quiz funnels. Edit steps, questions, and content on the fly to generate leads.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "prompt": ""
+}

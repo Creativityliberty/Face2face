@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: video-funnel-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: video_funnel_builder
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d video_funnel_builder"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - video-funnel-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: video-funnel-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:postgres_password@postgres:5432/video_funnel_builder?schema=public
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_REFRESH_SECRET: your-super-secret-refresh-key-change-in-production
+      FRONTEND_URL: http://localhost:5173
+      MAX_FILE_SIZE: 10485760
+      UPLOAD_DIR: /app/uploads
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - video-funnel-network
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        npx prisma db push &&
+        npx prisma generate &&
+        npm run dev
+      "
+
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: video-funnel-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@videofunnel.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - video-funnel-network
+
+# Named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+# Custom network
+networks:
+  video-funnel-network:
+    driver: bridge

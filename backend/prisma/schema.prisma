@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  plan      Plan     @default(FREE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  funnels   Funnel[]
+  
+  @@map("users")
+}
+
+model Funnel {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  config          Json
+  isPublished     Boolean  @default(false)
+  redirectUrl     String?  // URL de redirection après lead capture
+  emailTemplate   String?  // Template email pour les résultats
+  maxSteps        Int      @default(15)
+  userId          String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leads       Lead[]
+  submissions Submission[]
+  
+  @@map("funnels")
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  name        String?
+  email       String?
+  phone       String?
+  subscribed  Boolean  @default(false)
+  answers     Json?
+  funnelId    String
+  submissionId String? // Lien vers submission complète
+  emailSent   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  funnel     Funnel      @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  submission Submission? @relation(fields: [submissionId], references: [id])
+  
+  @@map("leads")
+}
+
+model Media {
+  id        String    @id @default(cuid())
+  filename  String
+  originalName String
+  mimeType  String
+  size      Int
+  url       String
+  userId    String
+  createdAt DateTime  @default(now())
+  
+  @@map("media")
+}
+
+// Nouvelle table pour les soumissions complètes avec analyse
+model Submission {
+  id              String   @id @default(cuid())
+  funnelId        String
+  contactInfo     Json     // {name, email, phone, subscribed}
+  analyzedAnswers Json     // Réponses avec analyse IA
+  sentiment       String?  // Sentiment global
+  aiAnalysis      Json?    // Analyse IA complète
+  emailSent       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  funnel Funnel @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  leads  Lead[]
+  
+  @@map("submissions")
+}
+
+// Table pour les résultats d'analyse IA
+model AnalysisResult {
+  id           String   @id @default(cuid())
+  submissionId String
+  questionId   String
+  answer       String
+  analysis     Json     // Analyse IA de la réponse
+  sentiment    String?
+  keywords     String[]
+  createdAt    DateTime @default(now())
+  
+  @@map("analysis_results")
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}

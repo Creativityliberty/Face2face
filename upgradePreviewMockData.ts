@@ -1,0 +1,1 @@
+// No mock data needed for this phase - using existing quiz config data from constants.ts
