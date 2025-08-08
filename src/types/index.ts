@@ -1,4 +1,5 @@
 // Enums for the funnel builder component
+import type { DragEvent, ReactNode, ElementType, ChangeEvent } from 'react';
 export enum StepType {
   Welcome = 0,
   Question = 1,
@@ -44,8 +45,8 @@ export interface StepEditorProps {
   allSteps: QuizStep[];
   onUpdate: (update: Partial<QuizStep>) => void;
   onDelete: () => void;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragEnter: (e: React.DragEvent) => void;
+  onDragStart: (e: DragEvent) => void;
+  onDragEnter: (e: DragEvent) => void;
 }
 
 export interface ThemeEditorProps {
@@ -63,13 +64,13 @@ export interface ShareAndEmbedProps {
 
 export interface CollapsibleSectionProps {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   defaultOpen?: boolean;
 }
 
 export interface InputFieldProps {
   label?: string;
-  icon?: React.ElementType;
+  icon?: ElementType;
   onIconClick?: () => void;
   [key: string]: any;
 }
@@ -77,13 +78,15 @@ export interface InputFieldProps {
 export interface ColorPickerFieldProps {
   label: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 // Core data types
 export interface QuizConfig {
   steps: QuizStep[];
   theme: ThemeConfig;
+  redirectUrl?: string;
+  whatsappNumber?: string; // international format, digits only recommended
 }
 
 export interface QuizStep {

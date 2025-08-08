@@ -89,6 +89,7 @@ export interface QuizConfig {
   steps: QuizStep[];
   theme: ThemeConfig;
   redirectUrl?: string; // URL de redirection après lead capture
+  whatsappNumber?: string; // Numéro WhatsApp (international, chiffres uniquement) pour la redirection auto
   maxSteps?: number; // Limite du nombre d'étapes (défaut: 15)
 }
 

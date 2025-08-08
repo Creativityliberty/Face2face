@@ -7,12 +7,12 @@ import { QuizCompletionScreen } from './screens/QuizCompletionScreen';
 import { LeadConfirmationScreen } from './screens/LeadConfirmationScreen';
 import { ErrorBoundary } from './screens/ErrorBoundary';
 import { useAppStore } from '../src/stores/appStore';
-import { StepType, type QuizStep, type QuestionStep, type MessageStep, type LeadCaptureStep, type WelcomeStep, type QuestionOption } from '../types';
+import { StepType, type QuizStep, type QuestionStep, type MessageStep, type LeadCaptureStep, type WelcomeStep, type QuestionOption, type QuizConfig } from '../types';
 
 interface QuizContainerProps {
   step: number;
   quizSteps: QuizStep[];
-  config?: { redirectUrl?: string };
+  config?: QuizConfig;
   onNext: () => void;
   onBack: () => void;
   onAnswer: (questionId: string, answer: string | { type: 'voice' | 'video'; url: string }) => void;
@@ -43,6 +43,14 @@ export const QuizContainer: React.FC<QuizContainerProps> = ({
   const [showConfirmation, setShowConfirmation] = React.useState(false);
   const currentStepData = quizSteps[step];
   
+  const buildWhatsAppUrl = (raw?: string) => {
+    if (!raw) return undefined;
+    const digits = raw.replace(/[^0-9]/g, '');
+    if (!digits) return undefined;
+    return `https://wa.me/${digits}`;
+  };
+  const redirectTarget = config?.redirectUrl || buildWhatsAppUrl(config?.whatsappNumber);
+  
   // Check if we should show lead confirmation
   if (showConfirmation && leadCaptureData) {
     return (
@@ -50,7 +58,7 @@ export const QuizContainer: React.FC<QuizContainerProps> = ({
         <div className="w-full max-w-2xl px-8">
           <LeadConfirmationScreen
             contactInfo={leadCaptureData}
-            redirectUrl={config?.redirectUrl}
+            redirectUrl={redirectTarget}
             onRestartQuiz={() => {
               setShowConfirmation(false);
               setLeadCaptureData(null);

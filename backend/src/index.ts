@@ -6,7 +6,7 @@ import { authRoutes } from './routes/auth.routes';
 import { funnelRoutes } from './routes/funnel.routes';
 import { leadRoutes } from './routes/lead.routes';
 import fastifyStatic from '@fastify/static';
-import path from 'path';
+import path from 'node:path';
 import { mediaRoutes } from './routes/media.routes';
 
 // Load environment variables

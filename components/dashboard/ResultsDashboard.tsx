@@ -14,6 +14,8 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
   onAnalyze 
 }) => {
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+  // Track which submissions are expanded in the list view
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const totalPages = Math.ceil(submissions.length / itemsPerPage);
@@ -76,6 +78,11 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                     <p className="text-sm text-gray-500">
                       {submission.contactInfo.email}
                     </p>
+                    {submission.contactInfo.phone && (
+                      <p className="text-sm text-gray-500">
+                        {submission.contactInfo.phone}
+                      </p>
+                    )}
                     <div className="flex items-center space-x-2 mt-1">
                       <span className="text-xs text-gray-400">
                         {submission.analyzedAnswers.length} answer{submission.analyzedAnswers.length !== 1 ? 's' : ''}
@@ -92,6 +99,38 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                     <p>{formatSubmissionTime(submission.timestamp)}</p>
                   </div>
                 </div>
+                {/* Toggle button for inline answers */}
+                <div className="mt-2 flex justify-end">
+                  <button
+                    className="text-sm text-blue-600 hover:underline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const newSet = new Set(expandedIds);
+                      if (newSet.has(submission.id)) {
+                        newSet.delete(submission.id);
+                      } else {
+                        newSet.add(submission.id);
+                      }
+                      setExpandedIds(newSet);
+                    }}
+                  >
+                    {expandedIds.has(submission.id) ? 'Hide Answers' : 'Show Answers'}
+                  </button>
+                </div>
+                {expandedIds.has(submission.id) && (
+                  <div className="mt-4 space-y-2">
+                    {submission.analyzedAnswers.map((answer) => (
+                      <div key={answer.questionId} className="border rounded p-2">
+                        <p className="font-medium text-gray-700 mb-1">{answer.questionText}</p>
+                        <p className="text-gray-600 whitespace-pre-wrap">
+                          {typeof answer.answer === 'string'
+                            ? answer.answer
+                            : answer.answer?.url || 'No answer'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </Card>
             ))}
           </div>

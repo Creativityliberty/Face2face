@@ -6,7 +6,7 @@ import { AIAssistant } from './builder/AIAssistant';
 import { ThemeEditor } from './builder/ThemeEditor';
 import { StepEditor } from './builder/StepEditor';
 import { ShareAndEmbed } from './builder/ShareAndEmbed';
-import { Select, Button } from './ui';
+import { Select, Button, Input } from './ui';
 
 // Helper to create a new step based on selected type
 const createNewStep = (type: StepType): QuizStep => {
@@ -89,6 +89,11 @@ export const Builder: React.FC<BuilderProps> = ({ config, setConfig }) => {
     setConfig({ ...config, theme });
   };
 
+  // Funnel settings update handlers
+  const updateWhatsAppNumber = (value: string) => {
+    setConfig({ ...config, whatsappNumber: value });
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen p-4 overflow-y-auto">
       {/* AI Assistant Section */}
@@ -141,6 +146,21 @@ export const Builder: React.FC<BuilderProps> = ({ config, setConfig }) => {
           <Button onClick={addStep} variant="primary">
             Add Step
           </Button>
+        </div>
+      </CollapsibleSection>
+
+      {/* Funnel Settings */}
+      <CollapsibleSection title="Funnel Settings" defaultOpen={false}>
+        <div className="space-y-4">
+          <Input
+            label="WhatsApp Number (international format)"
+            placeholder="e.g. +14155550123"
+            value={(config as any).whatsappNumber || ''}
+            onChange={(e) => updateWhatsAppNumber(e.target.value)}
+          />
+          <p className="text-xs text-gray-500">
+            After a lead is captured, users will be redirected automatically to this WhatsApp number in 3 seconds. Use an international number (with country code). Non-digit characters will be ignored when generating the link.
+          </p>
         </div>
       </CollapsibleSection>
 

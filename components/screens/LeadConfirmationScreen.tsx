@@ -21,12 +21,26 @@ export const LeadConfirmationScreen: React.FC<LeadConfirmationScreenProps> = ({
   
   const handleRedirect = () => {
     if (redirectUrl) {
-      window.open(redirectUrl, '_blank');
+      // Redirect in the same tab
+      window.location.href = redirectUrl;
     } else {
       // Redirection par défaut si aucune URL configurée
       window.location.reload();
     }
   };
+
+  // Automatic redirect after 3 seconds if a redirectUrl is provided
+  React.useEffect(() => {
+    if (!redirectUrl) return;
+    const timer = setTimeout(() => {
+      try {
+        window.location.href = redirectUrl;
+      } catch (e) {
+        window.open(redirectUrl, '_blank');
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [redirectUrl]);
   return (
     <div className="w-full max-w-md mx-auto animate-slide-in text-center">
       {/* Success Icon */}
@@ -40,6 +54,11 @@ export const LeadConfirmationScreen: React.FC<LeadConfirmationScreenProps> = ({
         <p className="text-gray-600" style={{ fontFamily: 'Poppins, sans-serif' }}>
           Votre inscription a été confirmée avec succès
         </p>
+        {redirectUrl && (
+          <p className="text-sm text-gray-500 mt-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            Redirection automatique dans 3 secondes...
+          </p>
+        )}
       </div>
 
       {/* Confirmation Details */}
