@@ -60,9 +60,10 @@ const App: React.FC = () => {
     setQuizConfig,
   } = useAppStore();
 
-  const [isAuthModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalView, setAuthModalView] = useState<'login' | 'register'>('login');
   const [showResults, setShowResults] = useState(false);
+  const [isSharedMode, setIsSharedMode] = useState(false);
 
   // Function to decode shared funnel config from URL
   const decodeConfigFromUrl = (encodedConfig: string): QuizConfig | null => {
@@ -86,6 +87,7 @@ const App: React.FC = () => {
       const sharedConfig = decodeConfigFromUrl(configParam);
       if (sharedConfig) {
         setQuizConfig(sharedConfig);
+        setIsSharedMode(true); // Activer le mode partage client
         console.log('Loaded shared funnel config:', sharedConfig);
       }
     }
@@ -107,25 +109,28 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-theme-bg font-sans">
       <ThemeManager theme={quizConfig.theme || DEFAULT_QUIZ_CONFIG.theme} />
       
-      <Header 
-        onLoginClick={handleOpenLogin}
-        onRegisterClick={handleOpenRegister}
-        onToggleBuilder={toggleBuilderMode}
-        onShowResults={() => setShowResults(!showResults)}
-        isBuilderMode={isBuilderMode}
-        showResultsButton={true}
-      />
+      {/* Header masqué en mode partage client */}
+      {!isSharedMode && (
+        <Header 
+          onLoginClick={handleOpenLogin}
+          onRegisterClick={handleOpenRegister}
+          onToggleBuilder={toggleBuilderMode}
+          onShowResults={() => setShowResults(!showResults)}
+          isBuilderMode={isBuilderMode}
+          showResultsButton={true}
+        />
+      )}
 
       <AuthModal 
-        isOpen={isAuthModalOpen}
+        isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         initialView={authModalView}
       />
 
-      <main className="flex-1 flex bg-gray-100">
+      <main className={`flex-1 flex bg-gray-100 ${isSharedMode ? 'justify-center items-center' : ''}`}>
         {/* Left Panel - Quiz/Builder Content */}
-        <div className="w-1/2 bg-white">
-          {isBuilderMode ? (
+        <div className={isSharedMode ? "w-full max-w-4xl bg-white rounded-lg shadow-lg" : "w-1/2 bg-white"}>
+          {(isBuilderMode && !isSharedMode) ? (
             <Builder 
               config={quizConfig} 
               setConfig={setQuizConfig}
@@ -172,32 +177,35 @@ const App: React.FC = () => {
           )}
         </div>
         
-        {/* Right Panel - Preview */}
-        <div className="w-1/2 bg-black relative">
-          {getCurrentStepIndex() !== null && getCurrentStep() ? (
-            <MediaViewer 
-              media={getCurrentStep()!.media || { type: 'image', url: '' }} 
-              isWelcomeScreen={getCurrentStep()!.type === 0} 
-              className="h-full"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors cursor-pointer">
-                <div className="w-10 h-10 border-2 border-white rounded-full flex items-center justify-center">
-                  <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent ml-1"></div>
+        {/* Right Panel - Preview (masqué en mode partage client) */}
+        {!isSharedMode && (
+          <div className="w-1/2 bg-black relative">
+            {getCurrentStepIndex() !== null && getCurrentStep() ? (
+              <MediaViewer 
+                media={getCurrentStep()!.media || { type: 'image', url: '' }} 
+                isWelcomeScreen={getCurrentStep()!.type === 0} 
+                className="h-full"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors cursor-pointer">
+                  <div className="w-10 h-10 border-2 border-white rounded-full flex items-center justify-center">
+                    <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent ml-1"></div>
+                  </div>
                 </div>
               </div>
+            )}
+            <div className="absolute bottom-4 left-4 text-white text-sm opacity-75 bg-black/50 px-2 py-1 rounded">
+              Preview Mode
             </div>
-          )}
-          <div className="absolute bottom-4 left-4 text-white text-sm opacity-75 bg-black/50 px-2 py-1 rounded">
-            Preview Mode
           </div>
-        </div>
+        )}
       </main>
       
       <Footer 
         isBuilderMode={isBuilderMode}
         onToggleBuilder={toggleBuilderMode}
+        isSharedMode={isSharedMode}
       />
       
       {/* Results Panel Overlay */}

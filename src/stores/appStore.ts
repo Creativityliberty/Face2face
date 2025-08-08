@@ -10,6 +10,7 @@ interface AppStore {
   answers: Answers;
   isBuilderMode: boolean;
   history: string[];
+  submissions: Submission[];
   
   // Actions
   setQuizConfig: (config: QuizConfig) => void;
@@ -19,6 +20,7 @@ interface AppStore {
   goBack: () => void;
   goToNext: () => void;
   reset: () => void;
+  addSubmission: (submission: Submission) => void;
   
   // Computed
   getCurrentStep: () => any;
@@ -35,6 +37,7 @@ export const useAppStore = create<AppStore>()(
       answers: {},
       isBuilderMode: false,
       history: [DEFAULT_QUIZ_CONFIG.steps[0]?.id || ''],
+      submissions: [],
       
       // Actions
       setQuizConfig: (config) => {
@@ -114,13 +117,20 @@ export const useAppStore = create<AppStore>()(
       canGoBack: () => {
         const state = get();
         return state.history.length > 1;
+      },
+      
+      addSubmission: (submission: Submission) => {
+        set((state) => ({
+          submissions: [...state.submissions, submission]
+        }));
       }
     }),
     { 
       name: 'funnel-storage',
       partialize: (state) => ({
         quizConfig: state.quizConfig,
-        answers: state.answers
+        answers: state.answers,
+        submissions: state.submissions
       })
     }
   )

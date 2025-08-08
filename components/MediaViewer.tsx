@@ -9,13 +9,41 @@ interface YouTubePreviewProps {
 }
 
 const YouTubePreview: React.FC<YouTubePreviewProps> = ({ videoId, onPlay }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
   const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  
+  const handlePlay = () => {
+    setIsPlaying(true);
+    onPlay();
+  };
+  
+  // Auto-play after 3 seconds (optional)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Uncomment next line for auto-play after 3 seconds
+      // handlePlay();
+    }, 3000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (isPlaying) {
+    return (
+      <iframe
+        className="absolute top-0 left-0 w-full h-full"
+        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`}
+        title="YouTube video"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+      />
+    );
+  }
   
   return (
     <div 
-      id={`youtube-${videoId}`}
       className="absolute inset-0 cursor-pointer group"
-      onClick={onPlay}
+      onClick={handlePlay}
     >
       {/* YouTube Thumbnail */}
       <img 
@@ -162,20 +190,8 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
             <YouTubePreview 
               videoId={videoId} 
               onPlay={() => {
-                // Replace with iframe when clicked
-                const container = document.getElementById(`youtube-${videoId}`);
-                if (container) {
-                  container.innerHTML = `
-                    <iframe
-                      class="absolute top-0 left-0 w-full h-full"
-                      src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0"
-                      title="YouTube video"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowfullscreen
-                    ></iframe>
-                  `;
-                }
+                // This callback is handled by the YouTubePreview component itself
+                console.log('YouTube video play requested');
               }}
             />
           );

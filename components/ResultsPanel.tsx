@@ -1,7 +1,8 @@
 import React from 'react';
 import { X, BarChart3 } from 'lucide-react';
 import { ResultsDashboard } from './dashboard/ResultsDashboard';
-import { mockSubmissions, mockAnalyzeAnswer } from '../resultsDashboardMockData';
+import { mockAnalyzeAnswer } from '../resultsDashboardMockData';
+import { useAppStore } from '../src/stores/appStore';
 
 interface ResultsPanelProps {
   isVisible: boolean;
@@ -9,6 +10,8 @@ interface ResultsPanelProps {
 }
 
 export const ResultsPanel: React.FC<ResultsPanelProps> = ({ isVisible, onClose }) => {
+  const { submissions } = useAppStore();
+  
   if (!isVisible) return null;
 
   return (
@@ -35,7 +38,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ isVisible, onClose }
         {/* Content */}
         <div className="flex-1 overflow-hidden">
           <ResultsDashboard 
-            submissions={mockSubmissions} 
+            submissions={submissions} 
             onAnalyze={mockAnalyzeAnswer}
           />
         </div>

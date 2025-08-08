@@ -6,6 +6,7 @@ import { LeadCaptureScreen } from './LeadCaptureScreen';
 import { QuizCompletionScreen } from './screens/QuizCompletionScreen';
 import { LeadConfirmationScreen } from './screens/LeadConfirmationScreen';
 import { ErrorBoundary } from './screens/ErrorBoundary';
+import { useAppStore } from '../src/stores/appStore';
 import { StepType, type QuizStep, type QuestionStep, type MessageStep, type LeadCaptureStep, type WelcomeStep, type QuestionOption } from '../types';
 
 interface QuizContainerProps {
@@ -38,6 +39,7 @@ export const QuizContainer: React.FC<QuizContainerProps> = ({
   onSaveSubmission
 }) => {
   const [leadCaptureData, setLeadCaptureData] = React.useState<any>(null);
+  const { answers, quizConfig, addSubmission } = useAppStore();
   const [showConfirmation, setShowConfirmation] = React.useState(false);
   const currentStepData = quizSteps[step];
   
@@ -100,6 +102,19 @@ export const QuizContainer: React.FC<QuizContainerProps> = ({
   const handleLeadCaptureSubmit = (contactInfo: any) => {
     // Handle lead capture submission
     console.log('Lead captured:', contactInfo);
+    
+    // Create a submission object
+    const submission: any = {
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      contactInfo,
+      answers: answers,
+      funnelId: 'funnel-' + Date.now(),
+      status: 'completed'
+    };
+    
+    // Add to store
+    addSubmission(submission);
     
     // Store lead data and show confirmation
     setLeadCaptureData(contactInfo);
