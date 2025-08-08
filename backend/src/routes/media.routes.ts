@@ -5,6 +5,7 @@ import { pipeline } from 'stream';
 import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs/promises';
+import { createWriteStream } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
 const pump = promisify(pipeline);
@@ -30,7 +31,7 @@ export async function mediaRoutes(fastify: FastifyInstance) {
     const filePath = path.join(uploadDir, newName);
 
     // stream file to disk
-    await pump(file, fs.createWriteStream(filePath));
+    await pump(file, createWriteStream(filePath));
 
     // Build public URL – in dev we can serve via fastify-static (not added here)
     const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
