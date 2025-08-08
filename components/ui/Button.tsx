@@ -24,7 +24,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseClasses = 'font-semibold rounded-lg transition-all duration-200 inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2';
+  const baseClasses = 'font-semibold rounded-lg transition-all duration-200 inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 touch-manipulation min-h-[44px]';
   
   const variants = {
     primary: 'bg-brand-rose hover:bg-brand-rose-dark text-brand-button-text shadow-md hover:shadow-lg transform hover:scale-105 focus:ring-brand-rose',
@@ -33,9 +33,9 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const sizes = {
-    sm: 'py-2 px-4 text-sm',
-    md: 'py-3 px-6 text-base',
-    lg: 'py-4 px-8 text-lg'
+    sm: 'py-2 px-3 sm:px-4 text-sm min-h-[40px]',
+    md: 'py-3 px-4 sm:px-6 text-sm sm:text-base min-h-[44px]',
+    lg: 'py-4 px-6 sm:px-8 text-base sm:text-lg min-h-[48px]'
   };
 
   const isDisabled = disabled || loading;

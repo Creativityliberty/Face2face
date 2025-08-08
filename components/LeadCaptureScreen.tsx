@@ -34,11 +34,11 @@ export const LeadCaptureScreen: React.FC<LeadCaptureScreenProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto animate-slide-in text-brand-text">
-      <h2 className="text-4xl font-bold mb-4 text-center">{stepData.title}</h2>
-      <p className="mb-8 text-base opacity-90 text-center">{stepData.subtitle}</p>
+    <div className="w-full max-w-md mx-auto animate-slide-in text-brand-text px-4 sm:px-0">
+      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-center break-words">{stepData.title}</h2>
+      <p className="mb-6 sm:mb-8 text-sm sm:text-base opacity-90 text-center break-words">{stepData.subtitle}</p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-4">
         <InputWithIcon
           icon={UserIcon}
           type="text"
@@ -74,7 +74,7 @@ export const LeadCaptureScreen: React.FC<LeadCaptureScreenProps> = ({
             type="checkbox"
             checked={subscribed}
             onChange={(e) => setSubscribed(e.target.checked)}
-            className="h-5 w-5 mt-0.5 rounded border-gray-300 text-brand-maroon focus:ring-brand-maroon"
+            className="h-5 w-5 sm:h-5 sm:w-5 mt-0.5 rounded border-gray-300 text-brand-maroon focus:ring-brand-maroon touch-manipulation"
           />
           <label htmlFor="subscribe" className="text-sm text-brand-text/80">
             {stepData.subscriptionText}{' '}

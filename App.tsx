@@ -127,11 +127,11 @@ const App: React.FC = () => {
         initialView={authModalView}
       />
 
-      <main className={`flex-1 flex ${isSharedMode ? 'bg-gray-50 px-4 py-8' : 'bg-gray-100'}`}>
-        {/* Container pour le mode partage */}
-        <div className={`flex w-full ${isSharedMode ? 'max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden' : ''}`}>
-          {/* Left Panel - Quiz/Builder Content */}
-          <div className={isSharedMode ? "w-1/2 bg-white" : "w-1/2 bg-white"}>
+      <main className={`flex-1 flex ${isSharedMode ? 'bg-gray-50 px-2 sm:px-4 py-4 sm:py-8' : 'bg-gray-100'}`}>
+        {/* Container pour le mode partage - Responsive */}
+        <div className={`flex flex-col lg:flex-row w-full ${isSharedMode ? 'max-w-7xl mx-auto bg-white rounded-lg sm:rounded-2xl shadow-xl overflow-hidden' : ''}`}>
+          {/* Left Panel - Quiz/Builder Content - Responsive */}
+          <div className={isSharedMode ? "w-full lg:w-1/2 bg-white min-h-[300px] lg:min-h-auto" : "w-full lg:w-1/2 bg-white"}>
           {(isBuilderMode && !isSharedMode) ? (
             <Builder 
               config={quizConfig} 
@@ -180,13 +180,13 @@ const App: React.FC = () => {
           )}
         </div>
         
-        {/* Right Panel - Preview (toujours affiché pour les médias) */}
-        <div className="w-1/2 bg-black relative">
+        {/* Right Panel - Media Viewer - Responsive */}
+        <div className={isSharedMode ? "w-full lg:w-1/2 bg-gray-50 min-h-[300px] lg:min-h-auto" : "w-full lg:w-1/2 bg-gray-50"}>
           {getCurrentStepIndex() !== null && getCurrentStep() ? (
             <MediaViewer 
               media={getCurrentStep()!.media || { type: 'image', url: '' }} 
               isWelcomeScreen={getCurrentStep()!.type === 0} 
-              className="h-full"
+              className="h-full min-h-[300px] lg:min-h-auto"
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">

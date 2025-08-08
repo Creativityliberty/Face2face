@@ -26,17 +26,17 @@ const FaceAFaceLogo = () => (
 
 export const Footer: React.FC<FooterProps> = ({ isBuilderMode, onToggleBuilder, isSharedMode = false }) => {
   return (
-    <footer className="w-full bg-brand-maroon text-white py-3 px-8 flex items-center justify-center relative">
+    <footer className="w-full bg-brand-maroon text-white py-3 px-4 sm:px-8 flex items-center justify-center relative min-h-[56px]">
       <FaceAFaceLogo />
       {/* Bouton Edit masqué en mode partage client */}
       {!isSharedMode && (
         <button 
           onClick={onToggleBuilder} 
-          className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-md transition-colors"
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 flex items-center space-x-1 sm:space-x-2 bg-white/10 hover:bg-white/20 px-2 sm:px-3 py-2 sm:py-1.5 rounded-md transition-colors touch-manipulation min-h-[40px]"
           title={isBuilderMode ? "Preview Funnel" : "Edit Funnel"}
         >
-          {isBuilderMode ? <EyeIcon className="w-5 h-5" /> : <PencilSquareIcon className="w-5 h-5" />}
-          <span className="text-sm font-medium">{isBuilderMode ? 'Preview' : 'Edit Funnel'}</span>
+          {isBuilderMode ? <EyeIcon className="w-4 h-4 sm:w-5 sm:h-5" /> : <PencilSquareIcon className="w-4 h-4 sm:w-5 sm:h-5" />}
+          <span className="text-xs sm:text-sm font-medium hidden sm:inline">{isBuilderMode ? 'Preview' : 'Edit Funnel'}</span>
         </button>
       )}
     </footer>
