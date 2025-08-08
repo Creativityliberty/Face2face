@@ -2,6 +2,59 @@ import React, { useState, useRef, useEffect } from 'react';
 import { VolumeX, VolumeUp, PhotoIcon } from './icons';
 import { type Media } from '../types';
 
+// YouTube Preview Component with Thumbnail and Play Button
+interface YouTubePreviewProps {
+  videoId: string;
+  onPlay: () => void;
+}
+
+const YouTubePreview: React.FC<YouTubePreviewProps> = ({ videoId, onPlay }) => {
+  const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  
+  return (
+    <div 
+      id={`youtube-${videoId}`}
+      className="absolute inset-0 cursor-pointer group"
+      onClick={onPlay}
+    >
+      {/* YouTube Thumbnail */}
+      <img 
+        src={thumbnailUrl}
+        alt="YouTube video thumbnail"
+        className="absolute inset-0 w-full h-full object-cover"
+        onError={(e) => {
+          // Fallback to default thumbnail if maxresdefault doesn't exist
+          const target = e.target as HTMLImageElement;
+          target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+        }}
+      />
+      
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
+      
+      {/* Play Button */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center group-hover:bg-red-700 transition-all duration-300 shadow-2xl">
+          <svg 
+            className="w-8 h-8 text-white ml-1" 
+            fill="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </div>
+      
+      {/* YouTube Logo */}
+      <div className="absolute bottom-4 right-4">
+        <div className="bg-black/80 px-2 py-1 rounded text-white text-xs font-semibold">
+          YouTube
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface MediaViewerProps {
   media: Media;
   isWelcomeScreen?: boolean;
@@ -89,21 +142,41 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
         const isYouTube = media.url.includes('youtube.com') || media.url.includes('youtu.be');
         
         if (isYouTube) {
-          // Convert YouTube URL to embed format
-          const getYouTubeEmbedUrl = (url: string) => {
-            const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-            return videoId ? `https://www.youtube.com/embed/${videoId[1]}?autoplay=1&mute=1&loop=1&playlist=${videoId[1]}` : url;
+          // Extract YouTube video ID
+          const getYouTubeVideoId = (url: string) => {
+            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+            return match ? match[1] : null;
           };
           
+          const videoId = getYouTubeVideoId(media.url);
+          
+          if (!videoId) {
+            return (
+              <div className="absolute inset-0 bg-gray-800 flex items-center justify-center text-white">
+                <p>Invalid YouTube URL</p>
+              </div>
+            );
+          }
+          
           return (
-            <iframe
-              key={media.url}
-              className="absolute top-0 left-0 w-full h-full"
-              src={getYouTubeEmbedUrl(media.url)}
-              title="YouTube video"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
+            <YouTubePreview 
+              videoId={videoId} 
+              onPlay={() => {
+                // Replace with iframe when clicked
+                const container = document.getElementById(`youtube-${videoId}`);
+                if (container) {
+                  container.innerHTML = `
+                    <iframe
+                      class="absolute top-0 left-0 w-full h-full"
+                      src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0"
+                      title="YouTube video"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowfullscreen
+                    ></iframe>
+                  `;
+                }
+              }}
             />
           );
         } else {
