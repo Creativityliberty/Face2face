@@ -2,11 +2,15 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { prisma } from '../utils/database';
 
+// Webhook configuration (Make.com)
+const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL || 'https://hook.eu2.make.com/4cvgrkxqqgedaq11oocig3rsef8rcvaf';
+
 // Validation schemas
 const createLeadSchema = z.object({
   name: z.string().optional(),
   email: z.string().email().optional(),
   phone: z.string().optional(),
+  subscribed: z.boolean().optional(),
   answers: z.any().optional(),
   funnelId: z.string().cuid()
 });
@@ -22,7 +26,7 @@ const exportQuerySchema = z.object({
 export class LeadController {
   static async createLead(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const { name, email, phone, answers, funnelId } = createLeadSchema.parse(request.body);
+      const { name, email, phone, subscribed, answers, funnelId } = createLeadSchema.parse(request.body);
 
       // Check if funnel exists and is published
       const funnel = await prisma.funnel.findFirst({
@@ -44,10 +48,44 @@ export class LeadController {
           name,
           email,
           phone,
+          subscribed,
           answers,
           funnelId
         }
       });
+
+      // Fire-and-forget webhook to Make (do not block the response)
+      (async () => {
+        try {
+          const payload = {
+            event: 'lead_created',
+            source: 'backend',
+            timestamp: new Date().toISOString(),
+            funnel: {
+              id: funnel.id,
+              title: funnel.title,
+              isPublished: funnel.isPublished,
+            },
+            lead: {
+              id: lead.id,
+              name: lead.name || null,
+              email: lead.email || null,
+              phone: lead.phone || null,
+              subscribed: lead.subscribed,
+              answers: lead.answers || null,
+              funnelId: lead.funnelId,
+              createdAt: lead.createdAt,
+            },
+          };
+          await fetch(MAKE_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          }).catch(() => {});
+        } catch (err) {
+          console.error('Lead webhook dispatch failed:', err);
+        }
+      })();
 
       return reply.status(201).send(lead);
     } catch (error) {

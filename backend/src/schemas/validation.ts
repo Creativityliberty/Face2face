@@ -39,6 +39,7 @@ export const createLeadSchema = z.object({
   name: z.string().optional(),
   email: z.string().email().optional(),
   phone: z.string().optional(),
+  subscribed: z.boolean().optional(),
   answers: z.any().optional(),
   funnelId: z.string().cuid()
 });

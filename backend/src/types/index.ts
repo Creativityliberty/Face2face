@@ -38,6 +38,7 @@ export interface CreateLeadRequest {
   name?: string;
   email?: string;
   phone?: string;
+  subscribed?: boolean;
   answers?: any;
   funnelId: string;
 }

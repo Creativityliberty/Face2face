@@ -8,6 +8,7 @@ import { LeadConfirmationScreen } from './screens/LeadConfirmationScreen';
 import { ErrorBoundary } from './screens/ErrorBoundary';
 import { useAppStore } from '../src/stores/appStore';
 import { StepType, type QuizStep, type QuestionStep, type MessageStep, type LeadCaptureStep, type WelcomeStep, type QuestionOption, type QuizConfig } from '../types';
+import apiFetch from '../lib/api';
 
 interface QuizContainerProps {
   step: number;
@@ -107,27 +108,105 @@ export const QuizContainer: React.FC<QuizContainerProps> = ({
     );
   }
 
-  const handleLeadCaptureSubmit = (contactInfo: any) => {
+  // Extract a funnelId from URL if present (supports search and hash fragments)
+  const getFunnelIdFromUrl = (): string | null => {
+    try {
+      const search = new URLSearchParams(window.location.search);
+      const hash = new URLSearchParams(window.location.hash.substring(1));
+      return (
+        search.get('funnelId') ||
+        hash.get('funnelId') ||
+        search.get('id') ||
+        hash.get('id') ||
+        null
+      );
+    } catch {
+      return null;
+    }
+  };
+
+  // Build analyzedAnswers array for Results dashboard from current answers and quiz steps
+  const buildAnalyzedAnswers = () => {
+    const list: { questionId: string; questionText: string; answer: any }[] = [];
+    for (const step of quizSteps) {
+      if (step.type === StepType.Question) {
+        const q = step as QuestionStep;
+        const ans = (answers as any)[q.id];
+        if (ans !== undefined) {
+          list.push({ questionId: q.id, questionText: q.question, answer: ans });
+        }
+      }
+    }
+    return list;
+  };
+
+  const handleLeadCaptureSubmit = async (contactInfo: any) => {
     // Handle lead capture submission
     console.log('Lead captured:', contactInfo);
-    
-    // Create a submission object
-    const submission: any = {
-      id: Date.now().toString(),
-      timestamp: new Date().toISOString(),
-      contactInfo,
-      answers: answers,
-      funnelId: 'funnel-' + Date.now(),
-      status: 'completed'
-    };
-    
-    // Add to store
-    addSubmission(submission);
-    
+
+    // Try to send to backend if we have a valid funnelId
+    const funnelId = getFunnelIdFromUrl();
+    let finalId = `local-${Date.now()}`;
+    const analyzedAnswers = buildAnalyzedAnswers();
+
+    if (funnelId) {
+      try {
+        const res = await apiFetch('/leads', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: contactInfo.name,
+            email: contactInfo.email,
+            phone: contactInfo.phone,
+            subscribed: contactInfo.subscribed,
+            answers: answers,
+            funnelId,
+          }),
+        });
+        if (res.ok) {
+          const lead = await res.json();
+          // Prisma returns createdAt as ISO string; normalize to number timestamp
+          finalId = lead.id || finalId;
+          const createdAt = lead.createdAt ? Date.parse(lead.createdAt) : Date.now();
+          addSubmission({
+            id: finalId,
+            timestamp: createdAt,
+            contactInfo,
+            analyzedAnswers,
+          } as any);
+        } else {
+          console.warn('Lead API returned non-OK status', res.status);
+          // Fallback to local-only submission
+          addSubmission({
+            id: finalId,
+            timestamp: Date.now(),
+            contactInfo,
+            analyzedAnswers,
+          } as any);
+        }
+      } catch (err) {
+        console.error('Lead API request failed:', err);
+        // Fallback to local-only submission
+        addSubmission({
+          id: finalId,
+          timestamp: Date.now(),
+          contactInfo,
+          analyzedAnswers,
+        } as any);
+      }
+    } else {
+      // No funnelId available (e.g., local/shared config). Save locally for dashboard.
+      addSubmission({
+        id: finalId,
+        timestamp: Date.now(),
+        contactInfo,
+        analyzedAnswers,
+      } as any);
+    }
+
     // Store lead data and show confirmation
     setLeadCaptureData(contactInfo);
     setShowConfirmation(true);
-    
+
     // Mark quiz as completed
     if (onQuizComplete) {
       onQuizComplete();
