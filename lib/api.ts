@@ -1,6 +1,28 @@
 import { useAppStore } from '../stores/appStore';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const RAW_API_BASE = (import.meta.env.VITE_API_URL as string | undefined);
+
+// Normalisation de la base URL API pour éviter les 404 en prod
+// - Si vide: '/api' (utilise le proxy Vite en dev)
+// - Si absolue (http/https) et ne termine pas par '/api': on ajoute '/api'
+// - Si relative et ne commence pas par '/api': on force '/api'
+function normalizeApiBase(raw?: string): string {
+  if (!raw || raw.trim() === '') return '/api';
+  let base = raw.trim();
+  // retirer les slashs finaux
+  while (base.length > 1 && base.endsWith('/')) base = base.slice(0, -1);
+  const isAbsolute = /^https?:\/\//i.test(base);
+  if (isAbsolute) {
+    if (!/\/api$/i.test(base)) base = `${base}/api`;
+    return base;
+  }
+  // chemins relatifs
+  if (!base.startsWith('/')) base = `/${base}`;
+  if (!/^\/api(\/|$)?/i.test(base)) base = '/api';
+  return base;
+}
+
+const API_BASE_URL = normalizeApiBase(RAW_API_BASE);
 
 // Fonction pour récupérer les tokens depuis le store Zustand
 const getTokens = () => {
@@ -53,8 +75,11 @@ const apiFetch = async (url: string, options: RequestInit = {}) => {
 
         const newTokens = await refreshResponse.json();
         
-        // Mise à jour des tokens dans le store
-        useAppStore.getState().setTokens(newTokens.accessToken, newTokens.refreshToken);
+        // Mise à jour des tokens dans le store (fallback refreshToken si non renvoyé par le backend)
+        const state = useAppStore.getState();
+        const existingRefresh = state?.refreshToken || null;
+        const nextRefresh = newTokens.refreshToken || existingRefresh;
+        state.setTokens(newTokens.accessToken, nextRefresh as string);
 
         // On réessaye la requête originale avec le nouveau token
         headers.set('Authorization', `Bearer ${newTokens.accessToken}`);

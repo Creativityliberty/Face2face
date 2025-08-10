@@ -146,11 +146,13 @@ export class AuthController {
       // Verify refresh token
       const payload = verifyRefreshToken(refreshToken);
 
-      // Generate new access token
+      // Generate new tokens (rotate refresh token)
       const newAccessToken = generateAccessToken(payload);
+      const newRefreshToken = generateRefreshToken(payload);
 
       return reply.send({
-        accessToken: newAccessToken
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken
       });
     } catch (error) {
       return reply.status(401).send({
