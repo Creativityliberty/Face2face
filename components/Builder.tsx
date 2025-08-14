@@ -1,6 +1,7 @@
 // Builder.tsx - Main funnel builder component
 import React from 'react';
 import { BuilderProps, StepType, QuizConfig, QuizStep, WelcomeStep, MessageStep, QuestionStep, LeadCaptureStep } from '../src/types';
+import { MAX_FUNNEL_STEPS } from '../constants';
 import { CollapsibleSection } from './ui/CollapsibleSection';
 import { AIAssistant } from './builder/AIAssistant';
 import { ThemeEditor } from './builder/ThemeEditor';
@@ -80,6 +81,10 @@ export const Builder: React.FC<BuilderProps> = ({ config, setConfig }) => {
   // Add step UI state
   const [newStepType, setNewStepType] = React.useState<StepType>(StepType.Welcome);
   const addStep = () => {
+    if (config.steps.length >= MAX_FUNNEL_STEPS) {
+      alert(`Limite maximale de ${MAX_FUNNEL_STEPS} étapes atteinte.`);
+      return;
+    }
     const newStep = createNewStep(newStepType);
     setConfig({ ...config, steps: [...config.steps, newStep] });
   };
@@ -131,22 +136,32 @@ export const Builder: React.FC<BuilderProps> = ({ config, setConfig }) => {
       </CollapsibleSection>
 
       {/* Add Step Section */}
-      <CollapsibleSection title="Add New Step" defaultOpen={false}>
+      <CollapsibleSection title={`Add New Step (${config.steps.length}/${MAX_FUNNEL_STEPS})`} defaultOpen={false}>
         <div className="flex items-center space-x-2 border-dashed border-2 border-gray-300 p-4 rounded">
           <Select
             label="Step Type"
             value={newStepType}
             onChange={(e) => setNewStepType(Number(e.target.value) as StepType)}
+            disabled={config.steps.length >= MAX_FUNNEL_STEPS}
           >
             <option value={StepType.Welcome}>Welcome</option>
             <option value={StepType.Question}>Question</option>
             <option value={StepType.Message}>Message</option>
             <option value={StepType.LeadCapture}>Lead Capture</option>
           </Select>
-          <Button onClick={addStep} variant="primary">
-            Add Step
+          <Button 
+            onClick={addStep} 
+            variant="primary"
+            disabled={config.steps.length >= MAX_FUNNEL_STEPS}
+          >
+            {config.steps.length >= MAX_FUNNEL_STEPS ? 'Limite atteinte' : 'Add Step'}
           </Button>
         </div>
+        {config.steps.length >= MAX_FUNNEL_STEPS && (
+          <p className="text-sm text-red-600 mt-2">
+            Limite maximale de {MAX_FUNNEL_STEPS} étapes atteinte.
+          </p>
+        )}
       </CollapsibleSection>
 
       {/* Funnel Settings */}

@@ -131,7 +131,7 @@ export async function generateFunnelFromPrompt(prompt: string, model: 'gemini-2.
 
         GUIDELINES:
         1.  **Understand the Goal:** Deeply analyze the user's prompt to understand the target audience and the desired outcome of the funnel.
-        2.  **Create a Compelling Flow:** Design a logical sequence of 5-7 steps that guide the user on a journey of self-discovery, leading them naturally to the lead capture form. Start with a Welcome step, use a mix of Question and Message steps, and end with a LeadCapture step.
+        2.  **Create a Compelling Flow:** Design a logical sequence of steps (up to 15 maximum) that guide the user on a journey of self-discovery, leading them naturally to the lead capture form. The number of steps should depend on the subject complexity and user needs. Start with a Welcome step, use a mix of Question and Message steps, and end with a LeadCapture step.
         3.  **Engaging Content:** Write compelling, empathetic, and clear text for all titles, questions, and options.
         4.  **Unique IDs:** Ensure ALL 'id' fields throughout the entire JSON object are unique strings (e.g., "step-1", "opt-1-1", "social-1"). This is critical.
         5.  **Media Suggestions:** For each step's 'media' property, provide a valid, public, royalty-free URL from Pexels (e.g., https://videos.pexels.com/...) or Pixabay. Choose media that is visually appealing and relevant to the step's content.
