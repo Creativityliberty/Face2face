@@ -70,33 +70,41 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                 className="p-4 hover:shadow-md transition-all cursor-pointer"
                 onClick={() => setSelectedSubmission(submission)}
               >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold text-brand-rose-dark">
-                      {submission.contactInfo.name || 'Anonymous'}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {submission.contactInfo.email}
-                    </p>
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                        {(submission.contactInfo.name || 'A').charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 text-lg">
+                          {submission.contactInfo.name || 'Utilisateur Anonyme'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {submission.contactInfo.email}
+                        </p>
+                      </div>
+                    </div>
+                    
                     {submission.contactInfo.phone && (
-                      <p className="text-sm text-gray-500">
-                        {submission.contactInfo.phone}
+                      <p className="text-sm text-gray-500 ml-13">
+                        📞 {submission.contactInfo.phone}
                       </p>
                     )}
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className="text-xs text-gray-400">
-                        {submission.analyzedAnswers.length} answer{submission.analyzedAnswers.length !== 1 ? 's' : ''}
+                    
+                    <div className="flex items-center space-x-3 mt-2 ml-13">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {submission.analyzedAnswers.length} réponse{submission.analyzedAnswers.length !== 1 ? 's' : ''}
                       </span>
                       {submission.contactInfo.subscribed && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Subscribed
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          ✓ Abonné
                         </span>
                       )}
+                      <span className="text-xs text-gray-400">
+                        Soumis le {formatSubmissionDate(submission.timestamp)} à {formatSubmissionTime(submission.timestamp)}
+                      </span>
                     </div>
-                  </div>
-                  <div className="text-right text-sm text-gray-400">
-                    <p>{formatSubmissionDate(submission.timestamp)}</p>
-                    <p>{formatSubmissionTime(submission.timestamp)}</p>
                   </div>
                 </div>
                 {/* Toggle button for inline answers */}
@@ -118,15 +126,38 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                   </button>
                 </div>
                 {expandedIds.has(submission.id) && (
-                  <div className="mt-4 space-y-2">
-                    {submission.analyzedAnswers.map((answer) => (
-                      <div key={answer.questionId} className="border rounded p-2">
-                        <p className="font-medium text-gray-700 mb-1">{answer.questionText}</p>
-                        <p className="text-gray-600 whitespace-pre-wrap">
-                          {typeof answer.answer === 'string'
-                            ? answer.answer
-                            : answer.answer?.url || 'No answer'}
-                        </p>
+                  <div className="mt-4 space-y-3 bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-800 mb-3">💬 Réponses détaillées :</h4>
+                    {submission.analyzedAnswers.map((answer, index) => (
+                      <div key={answer.questionId} className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-800 mb-2">{answer.questionText}</p>
+                            <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+                              <p className="text-gray-700 font-medium">
+                                {typeof answer.answer === 'string'
+                                  ? answer.answer
+                                  : answer.answer?.url ? `📎 Fichier média: ${answer.answer.url}` : '❌ Pas de réponse'}
+                              </p>
+                            </div>
+                            {answer.analysis && (
+                              <div className="mt-2 text-xs text-gray-500">
+                                <span className={`inline-flex items-center px-2 py-1 rounded-full ${
+                                  answer.analysis.sentiment === 'Positive' ? 'bg-green-100 text-green-800' :
+                                  answer.analysis.sentiment === 'Negative' ? 'bg-red-100 text-red-800' :
+                                  'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {answer.analysis.sentiment === 'Positive' ? '😊' : 
+                                   answer.analysis.sentiment === 'Negative' ? '😔' : '😐'} 
+                                  {answer.analysis.sentiment}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>

@@ -3,6 +3,7 @@ import { useAppStore } from '../stores/appStore';
 import { ChevronDown, Settings, BarChart3, Edit3, User, LogOut, FolderOpen, Image, Save } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Menu, X, Target } from 'lucide-react';
+import { UserSettings } from './UserSettings';
 
 interface HeaderProps {
   onLoginClick: () => void;
@@ -25,10 +26,9 @@ export const Header: React.FC<HeaderProps> = ({
   isBuilderMode, 
   showResultsButton = false 
 }) => {
+  const { isAuthenticated } = useAppStore();
+  const [showSettings, setShowSettings] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const user = useAppStore((state) => state.user);
-  const logout = useAppStore((state) => state.logout);
-  const isAuthenticated = useAppStore((state) => state.isAuthenticated());
 
   const toggleHeader = () => setIsCollapsed(!isCollapsed);
 
@@ -124,6 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
               
               <button
+                onClick={() => setShowSettings(true)}
                 className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white transition-colors"
                 style={{ fontFamily: 'Poppins, sans-serif' }}
               >
@@ -143,6 +144,12 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
       </header>
+      
+      {/* User Settings Modal */}
+      <UserSettings 
+        isVisible={showSettings} 
+        onClose={() => setShowSettings(false)} 
+      />
     </>
   );
 };

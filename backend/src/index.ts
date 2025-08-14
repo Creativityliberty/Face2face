@@ -90,18 +90,27 @@ fastify.setNotFoundHandler((request, reply) => {
 // Start server
 async function start() {
   try {
+    console.log('🔧 Starting server initialization...');
+    
+    console.log('📦 Registering plugins...');
     await registerPlugins();
+    console.log('✅ Plugins registered successfully');
+    
+    console.log('🛣️  Registering routes...');
     await registerRoutes();
+    console.log('✅ Routes registered successfully');
     
     const port = parseInt(process.env.PORT || '3001');
     const host = process.env.HOST || '0.0.0.0';
     
+    console.log(`🚀 Starting server on ${host}:${port}...`);
     await fastify.listen({ port, host });
     
     console.log(`🚀 Server running at http://${host}:${port}`);
     console.log(`📚 API Documentation available at http://${host}:${port}/api`);
     console.log(`🏥 Health check available at http://${host}:${port}/health`);
   } catch (error) {
+    console.error('❌ Server startup failed:', error);
     fastify.log.error(error);
     process.exit(1);
   }
