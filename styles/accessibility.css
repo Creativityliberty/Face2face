@@ -1,0 +1,127 @@
+/**
+ * Accessibility Improvements - UI-007
+ * Focus indicators visibles pour WCAG 2.1 AA
+ */
+
+/* Focus visible global pour tous les éléments interactifs */
+:focus-visible {
+  outline: 2px solid #A97C7C;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Boutons */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #A97C7C;
+  outline-offset: 2px;
+}
+
+/* Inputs */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #A97C7C;
+  outline-offset: 0;
+  border-color: transparent;
+}
+
+/* Links */
+a:focus-visible {
+  outline: 2px solid #A97C7C;
+  outline-offset: 4px;
+  text-decoration: underline;
+}
+
+/* Skip to content link (screen reader) */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #A97C7C;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  z-index: 100;
+  border-radius: 0 0 4px 0;
+  font-weight: 600;
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
+
+/* Screen reader only utility class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Focus ring personnalisé (Tailwind override) */
+.focus-ring {
+  transition: box-shadow 0.2s ease;
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #A97C7C;
+  outline: none;
+}
+
+/* Touch targets - minimum 44x44px */
+@media (max-width: 768px) {
+  button,
+  a,
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Reduced motion pour accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :focus-visible {
+    outline-width: 3px;
+  }
+
+  button,
+  a {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Focus within (pour les groupes de contrôles) */
+.form-group:focus-within {
+  outline: 2px dashed #A97C7C;
+  outline-offset: 4px;
+}
