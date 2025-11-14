@@ -6,6 +6,7 @@ import { LeadCaptureScreen } from './LeadCaptureScreen';
 import { QuizCompletionScreen } from './screens/QuizCompletionScreen';
 import { LeadConfirmationScreen } from './screens/LeadConfirmationScreen';
 import { ErrorBoundary } from './screens/ErrorBoundary';
+import { ProgressBar } from './ProgressBar';
 import { useAppStore } from '../src/stores/appStore';
 import { StepType, type QuizStep, type QuestionStep, type MessageStep, type LeadCaptureStep, type WelcomeStep, type QuestionOption, type QuizConfig } from '../types';
 import apiFetch from '../lib/api';
@@ -266,7 +267,15 @@ export const QuizContainer: React.FC<QuizContainerProps> = ({
 
   return (
     <ErrorBoundary onEditFunnel={onEditFunnel} onRetry={() => window.location.reload()}>
-      <div className="h-full w-full flex flex-col justify-center items-center">
+      {/* Progress Bar - Quick Win #1 */}
+      <ProgressBar
+        currentStep={step}
+        totalSteps={quizSteps.length}
+        showText={true}
+        fixed={true}
+      />
+
+      <div className="h-full w-full flex flex-col justify-center items-center pt-12">
         <div key={currentStepData.id} className="w-full max-w-2xl px-8">
           {renderStep()}
         </div>
