@@ -10,7 +10,7 @@ services:
     plan: starter
     branch: claude/audit-project-agents-structure-01QaEgPfbAEww6EiRSdU6Nri
     rootDir: backend
-    buildCommand: npm install --include=dev && npm run build
+    buildCommand: npm install --include=dev && npm run build && mkdir -p uploads
     startCommand: npm start
     healthCheckPath: /health
     envVars:
