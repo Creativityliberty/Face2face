@@ -1,4 +1,4 @@
-# Render Blueprint pour Face2Face Backend
+# Render Blueprint pour Face2Face Backend (FREE VERSION)
 # Documentation: https://render.com/docs/blueprint-spec
 
 services:
@@ -34,7 +34,7 @@ services:
         value: 100
 
 databases:
-  # PostgreSQL Database (FREE - vous pouvez upgrader manuellement après)
+  # PostgreSQL Database (FREE - pour tester)
   - name: face2face-db
     region: ohio
     plan: free
