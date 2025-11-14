@@ -37,6 +37,6 @@ databases:
   # PostgreSQL Database
   - name: face2face-db
     region: ohio
-    plan: starter
+    plan: standard
     databaseName: face2face
     user: face2face_user
