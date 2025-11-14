@@ -102,6 +102,15 @@ export const aiRoutes: FastifyPluginAsync = async (fastify) => {
 
       // Parse and validate response
       const text = response.text;
+
+      if (!text || typeof text !== 'string') {
+        fastify.log.error('AI response text is empty or invalid');
+        return reply.status(500).send({
+          success: false,
+          error: 'AI generated an empty response. Please try again.'
+        });
+      }
+
       let data;
 
       try {
