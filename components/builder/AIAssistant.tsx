@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Textarea, Select } from '../ui';
 import { SparklesIcon } from '../icons';
-import { generateFunnelFromPrompt } from '../../lib/ai';
+import { generateFunnelFromBackend } from '../../lib/api';
 import { type QuizConfig } from '../../types';
 
 interface AIAssistantProps {
@@ -19,7 +19,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ setConfig }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const newConfig = await generateFunnelFromPrompt(prompt, model);
+      // Use secure backend endpoint (API key never exposed to client)
+      const newConfig = await generateFunnelFromBackend(prompt, model);
       setConfig(newConfig);
     } catch (err) {
       console.error(err);

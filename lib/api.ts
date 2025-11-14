@@ -102,4 +102,53 @@ const apiFetch = async (url: string, options: RequestInit = {}) => {
   return response;
 };
 
+/**
+ * Generate a quiz funnel from a text prompt using the backend AI proxy.
+ * This keeps the Gemini API key secure on the server.
+ *
+ * @param prompt - Text description of the funnel to generate
+ * @param model - Gemini model to use (default: gemini-2.5-pro)
+ * @returns QuizConfig object
+ * @throws Error if generation fails
+ */
+export async function generateFunnelFromBackend(
+  prompt: string,
+  model: 'gemini-2.5-pro' | 'gemini-2.5-flash' = 'gemini-2.5-pro'
+): Promise<import('../types').QuizConfig> {
+  if (!prompt || prompt.trim().length === 0) {
+    throw new Error('Prompt cannot be empty');
+  }
+
+  const response = await apiFetch('/ai/generate-funnel', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ prompt, model })
+  });
+
+  if (!response.ok) {
+    let errorMessage = 'Failed to generate funnel. Please try again.';
+
+    try {
+      const errorData = await response.json();
+      if (errorData.error) {
+        errorMessage = errorData.error;
+      }
+    } catch (e) {
+      // If we can't parse error JSON, use default message
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  const result = await response.json();
+
+  if (!result.success || !result.data) {
+    throw new Error('Invalid response from server');
+  }
+
+  return result.data;
+}
+
 export default apiFetch;

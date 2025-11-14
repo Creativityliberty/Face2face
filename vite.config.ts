@@ -4,9 +4,10 @@ import { defineConfig, loadEnv } from 'vite';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
+      // ⚠️ API keys removed from client-side for security
+      // AI generation now happens through secure backend endpoint: /api/ai/generate-funnel
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        // No API keys exposed to client
       },
       resolve: {
         alias: {
