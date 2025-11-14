@@ -1,13 +1,25 @@
 import { GoogleGenAI } from "@google/genai";
 import { type QuizConfig, type QuizStep, StepType, QuestionOption, SocialLink } from '../types';
 
-// IMPORTANT: This line is for demonstration. In a real application,
-// the API key would be set in a secure environment variable on the server.
-// We are assuming `process.env.API_KEY` is available.
+/**
+ * ⚠️ DEPRECATED: This file is no longer used for security reasons.
+ *
+ * Client-side AI generation exposed the API key to the browser, allowing
+ * anyone to steal and abuse it.
+ *
+ * ✅ NEW: Use generateFunnelFromBackend() from lib/api.ts instead
+ *
+ * This keeps the API key secure on the backend and proxies requests
+ * through /api/ai/generate-funnel.
+ *
+ * This file is kept for reference only and may be removed in the future.
+ */
+
+// DEPRECATED: API key should NEVER be in client-side code
 if (!process.env.API_KEY) {
-    console.warn("API_KEY environment variable not set. AI features will not work.");
+    console.warn("⚠️ DEPRECATED: Client-side AI generation is no longer used. Use backend endpoint instead.");
 }
-const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
+const ai = new GoogleGenAI({apiKey: process.env.API_KEY || 'deprecated'});
 
 const parseJsonResponse = <T>(jsonString: string): T => {
     let cleanJsonString = jsonString.trim();
@@ -118,6 +130,38 @@ export interface QuizConfig {
 }
 `;
 
+/**
+ * Retry helper for API calls with exponential backoff
+ */
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  initialDelay: number = 1000
+): Promise<T> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+
+      // Si c'est une erreur "overloaded" (503), retry
+      if (error?.error?.code === 503 || error?.error?.status === 'UNAVAILABLE') {
+        const delay = initialDelay * Math.pow(2, attempt); // Exponential backoff
+        console.log(`API overloaded, retrying in ${delay}ms... (attempt ${attempt + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+
+      // Pour les autres erreurs, throw immédiatement
+      throw error;
+    }
+  }
+
+  throw lastError || new Error('Max retries reached');
+}
+
 export async function generateFunnelFromPrompt(prompt: string, model: 'gemini-2.5-pro' | 'gemini-2.5-flash' = 'gemini-2.5-pro'): Promise<QuizConfig> {
     if (!process.env.API_KEY) {
         throw new Error("API Key is not configured. Cannot use AI features.");
@@ -141,15 +185,20 @@ export async function generateFunnelFromPrompt(prompt: string, model: 'gemini-2.
         ${typeDefinitions}
     `;
 
-    const response = await ai.models.generateContent({
+    // Retry avec backoff en cas de surcharge API
+    const response = await retryWithBackoff(
+      async () => await ai.models.generateContent({
         model,
         contents: prompt,
         config: {
             systemInstruction,
             responseMimeType: 'application/json'
         }
-    });
-    
+      }),
+      3, // 3 tentatives
+      2000 // Commence à 2 secondes
+    );
+
     return parseJsonResponse<QuizConfig>(response.text);
 }
 

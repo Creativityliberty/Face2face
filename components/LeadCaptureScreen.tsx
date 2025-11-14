@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button, InputWithIcon, SocialIcon } from './ui';
+import { GetResultsCTA } from './ui/ButtonImproved';
 import { UserIcon, EnvelopeIcon, PhoneIcon } from './icons';
 import { type LeadCaptureStep } from '../types';
 
@@ -89,14 +90,12 @@ export const LeadCaptureScreen: React.FC<LeadCaptureScreenProps> = ({
           </label>
         </div>
 
-        <Button
+        {/* Quick Win #2: Improved CTA with value proposition */}
+        <GetResultsCTA
           type="submit"
-          variant="primary"
-          size="lg"
-          className="w-full bg-brand-maroon hover:bg-brand-maroon/90 text-brand-button-text font-bold shadow-lg"
-        >
-          {stepData.buttonText}
-        </Button>
+          fullWidth
+          className="shadow-lg"
+        />
       </form>
       
       {stepData.socialLinks && stepData.socialLinks.length > 0 && (

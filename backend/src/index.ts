@@ -8,6 +8,7 @@ import { leadRoutes } from './routes/lead.routes';
 import fastifyStatic from '@fastify/static';
 import path from 'node:path';
 import { mediaRoutes } from './routes/media.routes';
+import { aiRoutes } from './routes/ai.routes';
 
 // Load environment variables
 config();
@@ -54,6 +55,8 @@ async function registerRoutes() {
   await fastify.register(leadRoutes, { prefix: '/api/leads' });
   // Media routes (upload)
   await fastify.register(mediaRoutes, { prefix: '/api/media' });
+  // AI routes (secure Gemini proxy)
+  await fastify.register(aiRoutes, { prefix: '/api/ai' });
 }
 
 // Error handler
